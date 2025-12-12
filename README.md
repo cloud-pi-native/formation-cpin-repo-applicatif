@@ -63,6 +63,30 @@ Cliquez sur le bouton *Ajouter le dépôt* et attendre que le dépôt apparaisse
 
 ![depot](./img/services-externes.png)
 
+### Gitlab
+
+Lors de l'accès à Gitlab à travers la console CPiN, positionne directement sur le groupe Gitlab correspondant à son projet. Ce groupe contient différents repos de codes :
+ - infra-apps : Ce repos est créé automatiquement par la Console CPiN et est lié à une future feature, il n'est pas utilisé actuellement.
+ - infra-observability : Ce repo est créé automatiquement par la Console CPiN et doit contenir les "dashboards as code" ( plus d'information dans la documentation [https://cloud-pi-native.fr/agreement/observability#dashboard-as-code](https://cloud-pi-native.fr/agreement/observability#dashboard-as-code)
+ - mirror : Ce repos est créé automatiquement par la Console CPiN et contient le job Gitlab-ci permettant de synchroniser le repo externe vers le repo interne.
+ - les repos de codes et d'infrastructure déclarés dans la console
+
+Exemple :
+
+![repos](./img/repo-gitlab.jpg)
+
+Les jobs de synchronisation peuvent se voir depuis le repo mirror puis dans le menu Build->pipelines :
+![jobs](./img/job-synchro-mirror.png)
+
+L'exécution de ce job peut se faire : 
+ - Depuis la console sur le repo puis en cliquant sur le bouton ```Lancer la synchronisation```. A noter que lors de l'ajout d'un repo une première synchronisation de toutes les branches et effectuée par la console.
+ ![synchro depuis la console](./img/synchro-console.png)
+
+ - Depuis Gitlab depuis le projet mirror, aller dans Build -> pipeline puis cliquez sur le bouton ```New Pipeline```
+
+![synchro depuis gitlab](./img/job-synchro-gitlab.png)
+
+
 ### Ajout du fichier gitlab-ci
 
 Gitlab est configurée pour utiliser un fichier gitlab-ci nommé **.gitlab-ci-dso.yml** à la racine du projet.
