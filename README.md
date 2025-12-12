@@ -44,21 +44,24 @@ La construction de l'image applicative s'effectue donc par les étapes suivantes
 
 ### Ajout du dépôt externe
 
-Nous allons détailler l'intégration de cette application de démo à l'offre Cloud Pi Native sur la plateforme d'accéleration.
-
-Dans un premier temps il est nécessaire de créer un *projet*, puis d'ajouter le *repo de code* :
+Ajouter le repo de code de cette application à l'offre Cloud Pi Native sur son projet.
 
 1. Depuis un *projet*, aller dans l'onglet *Dépôt*, puis *ajouter un nouveau dépôt* :
 
- - *Nom du dépôt Git interne* : demo-java
+![depot](./img/depots.png)
+
+
+ - *Nom du dépôt Git interne* : app-java
 
 Le repo ne contient pas de code d'infrastructure et il possède des sources donc laisser les valeurs par défaut de la case à cocher et du radio bouton correspondant.
 
-2. Renseigner *l'URL du repo externe* [https://github.com/cloud-pi-native/tuto-java.git](https://github.com/cloud-pi-native/tuto-java.git). Le repo est public, laissez donc décocher la case *Dépôt de source privé*
+2. Renseigner *l'URL du repo externe* [https://github.com/cloud-pi-native/formation-cpin-repo-applicatif.git](https://github.com/cloud-pi-native/formation-cpin-repo-applicatif.git). Le repo est public, laissez donc décocher la case *Dépôt de source privé*
 
 Cliquez sur le bouton *Ajouter le dépôt* et attendre que le dépôt apparaisse dans la console.
 
-3. depuis l'onglet *Services externes* vérifier en cliquant sur le service Gitlab que le dépôt *demo-java* est bien présent dans ses projets gitlab.
+3. depuis l'onglet *Services externes* vérifier en cliquant sur le service Gitlab que le dépôt *app-java* est bien présent dans ses projets gitlab.
+
+![depot](./img/services-externes.png)
 
 ### Ajout du fichier gitlab-ci
 
@@ -66,7 +69,7 @@ Gitlab est configurée pour utiliser un fichier gitlab-ci nommé **.gitlab-ci-ds
 
 Pour des raisons de facilité, nous allons travailler à partir du repo de code de gitlab et non depuis la source, dans un mode projet, il conviendrait de travailler depuis le repo externe et de procéder à des synchronisation repo externe -> repo interne.
 
-1. Depuis Gitlab, aller dans le projet *demo-java* et choisir la branche *tuto* puis sur le bouton *edit* -> *web IDE* créer un fichier .gitlab-ci-dso.yml
+1. Depuis Gitlab, aller dans le projet *app-java* et choisir la branche *tuto* puis sur le bouton *edit* -> *web IDE* créer un fichier .gitlab-ci-dso.yml
 
 2. Ajouter la première partie suivante :
 
@@ -220,7 +223,7 @@ docker-build:
 
 ## Exécution de la chaine CI par gitlab
 
-Une fois que ce fichier est créé et commit / push sur le repos git, retourner sur le projet gitlab *demo-java* puis dans le menu *build* -> *pipelines* puis cliquez sur le bouton *Run pipeline*
+Une fois que ce fichier est créé et commit / push sur le repos git, retourner sur le projet gitlab *app-java* puis dans le menu *build* -> *pipelines* puis cliquez sur le bouton *Run pipeline*
 
 Le pipeline cherche automatiquement le fichier *.gitlab-dso.yaml* à la racine du projet et lance le pipeline.
 
