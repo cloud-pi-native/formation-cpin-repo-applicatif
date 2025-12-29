@@ -253,4 +253,4 @@ Le pipeline cherche automatiquement le fichier *.gitlab-dso.yaml* à la racine d
 
 ![build](img/build.png)
 
-> Bravo vous avez terminé le tutoriel de construction applicatif ! Prochaine étape le déploiement [ici](https://github.com/cloud-pi-native/tuto-java-infra-helm/tree/tuto)
+> Bravo vous avez terminé le tutoriel de construction applicatif !
