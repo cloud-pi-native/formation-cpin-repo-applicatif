@@ -144,7 +144,7 @@ read_secret:
     - .vault:read_secret
 ```
 
-#### Test unitaire de l'application
+#### Qualimétrie de l'application
 Ajouter la partie test unitaire sur le même principe :
 ```yaml
 test-app:
@@ -156,6 +156,8 @@ test-app:
     - .java:sonar
   allow_failure: true
 ```
+
+Cette partie permet de créer le projet sur SonarQube
 
 #### Construction de l'image et déploiement sur Harbor
 
@@ -252,5 +254,16 @@ Une fois que ce fichier est créé et commit / push sur le repos git, retourner 
 Le pipeline cherche automatiquement le fichier *.gitlab-dso.yaml* à la racine du projet et lance le pipeline.
 
 ![build](img/build.png)
+
+## SonarQube
+
+Une fois le projet construit, il est possible de consulter le rapport SonarQube. Pour cela, depuis la console, aller dans *Services externes* puis cliquez sur la tuile SonarQube : 
+
+![acces sonar](img/console-tuile-sonar.png)
+
+Depuis l'onglet *projects* de *SonarQube* cliquez sur le projet java et choisir la branche tuto en haut à gauche pour afficher les informations du projet : 
+
+![sonar projet](img/sonarqube-projet.png)
+
 
 > Bravo vous avez terminé le tutoriel de construction applicatif !
