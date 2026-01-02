@@ -12,7 +12,7 @@ id;name
 5;Emily
 ```
 
-## Compilation et construction de l'application
+### Processus de compilation et construction de l'application
 
 Le concept de "multistage build" dans Docker permet de définir plusieurs étapes de construction dans un même Dockerfile. Chaque étape utilise une image de base différente et peut exécuter des commandes spécifiques. L'intérêt principal est de séparer la phase de compilation (qui nécessite souvent de nombreux outils et dépendances) de la phase d'exécution (qui n'a besoin que de l'artefact final, comme un fichier .jar). 
 
@@ -55,7 +55,7 @@ Ajouter le repo de code de cette application à l'offre Cloud Pi Native sur son 
 
 Le repo ne contient pas de code d'infrastructure et il possède des sources donc laisser les valeurs par défaut de la case à cocher et du radio bouton correspondant.
 
-2. Renseigner *l'URL du repo externe* [https://github.com/cloud-pi-native/formation-cpin-repo-applicatif.git](https://github.com/cloud-pi-native/formation-cpin-repo-applicatif.git). Le repo est public, laissez donc décocher la case *Dépôt de source privé*
+2. Renseigner *l'URL du repo externe* [https://github.com/cloud-pi-native/formation-cpin-repo-applicatif.git](https://github.com/cloud-pi-native/formation-cpin-repo-applicatif.git). Le repo est public, laissez donc décochée la case *Dépôt de source privé*
 
 Cliquez sur le bouton *Ajouter le dépôt* et attendre que le dépôt apparaisse dans la console.
 
@@ -65,7 +65,7 @@ Cliquez sur le bouton *Ajouter le dépôt* et attendre que le dépôt apparaisse
 
 ### Gitlab
 
-Lors de l'accès à Gitlab à travers la console CPiN, positionne directement sur le groupe Gitlab correspondant à son projet. Ce groupe contient différents repos de codes :
+Lors de l'accès à Gitlab à travers la console CPiN, celle-ci ouvre un nouvel onglet directement sur le groupe Gitlab correspondant à son projet. Ce groupe contient différents repos de codes :
  - infra-apps : Ce repos est créé automatiquement par la Console CPiN et est lié à une future feature, il n'est pas utilisé actuellement.
  - infra-observability : Ce repo est créé automatiquement par la Console CPiN et doit contenir les "dashboards as code" ( plus d'information dans la documentation [https://cloud-pi-native.fr/agreement/observability#dashboard-as-code](https://cloud-pi-native.fr/agreement/observability#dashboard-as-code)
  - mirror : Ce repos est créé automatiquement par la Console CPiN et contient le job Gitlab-ci permettant de synchroniser le repo externe vers le repo interne.
@@ -89,11 +89,11 @@ L'exécution de ce job peut se faire :
 
 ### Ajout du fichier gitlab-ci
 
-Gitlab est configurée pour utiliser un fichier gitlab-ci nommé **.gitlab-ci-dso.yml** à la racine du projet.
+Afin de construire notre application, Gitlab est configurée pour utiliser un fichier gitlab-ci nommé **.gitlab-ci-dso.yml** présent à la racine du projet.
 
-Pour des raisons de facilité, nous allons travailler à partir du repo de code de gitlab et non depuis la source, dans un mode projet, il conviendrait de travailler depuis le repo externe et de procéder à des synchronisation repo externe -> repo interne.
+Pour des raisons de facilité, nous allons travailler directment à partir du repo de code de Gitlab et non depuis le repo externe, dans un mode projet, il conviendrait de travailler depuis le repo externe et de procéder à des synchronisation repo externe -> repo interne.
 
-1. Depuis Gitlab, aller dans le projet *app-java* et choisir la branche *tuto* puis sur le bouton *edit* -> *web IDE* créer un fichier .gitlab-ci-dso.yml
+1. Depuis Gitlab, aller dans le projet *app-java* et choisir la branche *tuto* puis sur le bouton *edit* -> *web IDE* créer un fichier ```.gitlab-ci-dso.yml``` à la racine du projet. Attention à bien nommé le fichier *exactement* ```.gitlab-ci-dso.yml``` faute de quoi il ne serait pas pris en compte.
 
 2. Ajouter la première partie suivante :
 
@@ -107,7 +107,7 @@ include:
   - local: "/includes/java-mvn.yml"
 ```
 
-Cette partie permet de charger les taches pré-définies et pré-paramétrée pour s'exécuter dans CPiN. Pour plus d'information sur le catalogue, voir le repo [dédié](https://github.com/cloud-pi-native/gitlab-ci-catalog)
+Cette partie permet de charger les taches pré-définies et pré-paramétrées pour s'exécuter dans CPiN. Pour plus d'information sur le catalogue, voir le repo [dédié](https://github.com/cloud-pi-native/gitlab-ci-catalog)
 
 Ajouter ensuite la partie suivante qui permet de définir les valeurs à mettre en cache, les variables et les étapes de construction:
 
@@ -145,7 +145,8 @@ read_secret:
 ```
 
 #### Qualimétrie de l'application
-Ajouter la partie test unitaire sur le même principe :
+Ajouter la partie qualimétrie (Sonarqube) sur le même principe :
+
 ```yaml
 test-app:
   variables:
@@ -157,7 +158,7 @@ test-app:
   allow_failure: true
 ```
 
-Cette partie permet de créer le projet sur SonarQube
+Cette partie permet de créer le projet sur l'instance SonarQube CPiN
 
 #### Construction de l'image et déploiement sur Harbor
 
@@ -205,10 +206,6 @@ include:
     ref: main
   - local: "/includes/java-mvn.yml"
 
-# default:
-#  tags:
-#    - ADD_CUSTOM_TAG_HERE
-
 cache:
   paths:
     - .m2/repository/
@@ -254,6 +251,13 @@ Une fois que ce fichier est créé et commit / push sur le repos git, retourner 
 Le pipeline cherche automatiquement le fichier *.gitlab-dso.yaml* à la racine du projet et lance le pipeline.
 
 ![build](img/build.png)
+
+Le build s'est bien passé si les 3 étapes sont vertes. Il est possible de consulter les logs associées à chacune des étapes en cliquant sur la coche verte (ou sur l'erreur si le build est KO)
+
+Les logs d'un build OK sur la troisième étape de build se terminent par une étape de push de l'image docker sur Harbor puis le log final Job succeeded :
+
+![logs](img/logs-build-ok.png)
+
 
 ## SonarQube
 
