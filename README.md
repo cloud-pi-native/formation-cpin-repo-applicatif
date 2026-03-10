@@ -98,7 +98,7 @@ Exemple :
 
 ### Synchronisation des dépôts
 
-Les jobs de synchronisation peuvent se voir depuis le dépôt mirror puis dans le menu `Build`>`Pipelines` :
+Les jobs de synchronisation peuvent se voir depuis le dépôt `mirror` puis dans le menu `Build`>`Pipelines` :
 
 ![jobs](./img/job-synchro-mirror.png)
 
