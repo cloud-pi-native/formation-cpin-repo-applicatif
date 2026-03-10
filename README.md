@@ -124,14 +124,16 @@ renseigner le champ ***PROJECT_NAME*** en spécifiant le nom du projet cible (*a
 Gitlab est configurée pour utiliser un fichier nommé `.gitlab-ci-dso.yml` qui doit être présent à la racine du projet.
 Cette convention vous permet de ne pas écraser un éventuel fichier de CI déjà utilisé par votre dépôt externe.
 
-> [!TIP] Pour des raisons de facilité pour la suite du tutorial, nous allons travailler directement à partir du dépôt de
+> [!TIP]
+> Pour des raisons de facilité pour la suite du tutorial, nous allons travailler directement à partir du dépôt de
 > code interne dans Gitlab. En conditions de travail normales, il conviendrait de travailler depuis le dépôt externe et 
 > de procéder à des synchronisations de ce dépôt externe vers le dépôt interne hébergé sur Gitlab.
 
 ▶️ Depuis Gitlab, allez dans le projet `app-java` et vérifiez que vous êtes bien à la racine du projet et sur la branche
 `tuto` en haut à gauche. Ensuite, cliquez sur le bouton `+`>`New file`. Appelez votre fichier `.gitlab-ci-dso.yml`.
 
-> [!IMPORTANT] Attention à bien nommer le fichier **exactement** `.gitlab-ci-dso.yml`, faute de quoi il ne serait pas 
+> [!IMPORTANT]
+> Attention à bien nommer le fichier **exactement** `.gitlab-ci-dso.yml`, faute de quoi il ne serait pas 
 > pris en compte.
 
 ▶️ Ajoutez la première partie suivante :
