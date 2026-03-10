@@ -62,7 +62,7 @@ La construction de l'image applicative s'effectue donc par les étapes suivantes
 
 Ajoutez le dépôt de code de cette application à l'offre Cloud Pi Native de votre projet.
 
-▶️ Depuis votre *projet*, allez dans l'onglet `Dépôt`, puis `+ Ajouter un nouveau dépôt` :
+▶️ Depuis votre *projet*, allez dans l'onglet `Ressources`, puis `+ Ajouter un nouveau dépôt` :
 
 ![depot](./img/depots.png)
 
