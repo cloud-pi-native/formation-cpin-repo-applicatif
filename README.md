@@ -222,7 +222,8 @@ Pour information, le bloc ci-dessus est une extension (mot-clef *extends*) d'une
 [catalogue de pipelines Gitlab](https://github.com/cloud-pi-native/gitlab-ci-catalog?tab=readme-ov-file#simple-build-push) 
 de la CiPN. Le détail de cette tâche est le suivant :
 
-> [!WARNING] Attention, vous n'avez pas besoin d'ajouter ce bloc à votre fichier.
+> [!WARNING]
+> Attention, vous n'avez pas besoin d'ajouter ce bloc à votre fichier.
 
 ```yaml
 .kaniko:simple-build-push:
