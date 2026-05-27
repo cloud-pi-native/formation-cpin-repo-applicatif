@@ -164,6 +164,7 @@ variables:
   TAG: "${CI_COMMIT_REF_SLUG}"
   DOCKERFILE: Dockerfile
   REGISTRY_URL: "${IMAGE_REPOSITORY}"
+  REMOTE_DOCKER_HUB_REGISTRY: "${REGISTRY_HOST}/dockerhub"
 
 stages:
   - read-secret
@@ -194,7 +195,7 @@ read_secret:
 ```yaml
 test-app:
   variables:
-    BUILD_IMAGE_NAME: maven:3.8-openjdk-17
+    BUILD_IMAGE_NAME: "${REMOTE_DOCKER_HUB_REGISTRY}/maven:3.8-openjdk-17"
     WORKING_DIR: .
   stage: test-app
   extends:
@@ -213,7 +214,12 @@ docker-build:
   variables:
     WORKING_DIR: "."
     IMAGE_NAME: java-demo
+    EXTRA_BUILD_ARGS: "--build-arg PROJECT_PATH=$PROJECT_PATH --build-arg NEXUS_USERNAME=$NEXUS_USERNAME --build-arg NEXUS_PASSWORD=$NEXUS_PASSWORD"
   stage: docker-build
+  before_script:
+    - cp "$MVN_CONFIG_FILE" settings.xml
+    # need to copy internal-ca.crt to the working dir for kaniko docker build
+    - if [ ! -z $CA_BUNDLE ]; then cp $CA_BUNDLE ./internal-ca.crt; else touch ./internal-ca.crt; fi
   extends:
     - .kaniko:simple-build-push
 ```
@@ -265,6 +271,7 @@ variables:
   TAG: "${CI_COMMIT_REF_SLUG}"
   DOCKERFILE: Dockerfile
   REGISTRY_URL: "${IMAGE_REPOSITORY}"
+  REMOTE_DOCKER_HUB_REGISTRY: "${REGISTRY_HOST}/dockerhub"
 
 stages:
   - read-secret
@@ -278,7 +285,7 @@ read_secret:
 
 test-app:
   variables:
-    BUILD_IMAGE_NAME: maven:3.8-openjdk-17
+    BUILD_IMAGE_NAME: "${REMOTE_DOCKER_HUB_REGISTRY}/maven:3.8-openjdk-17"
     WORKING_DIR: .
   stage: test-app
   extends:
@@ -289,7 +296,12 @@ docker-build:
   variables:
     WORKING_DIR: "."
     IMAGE_NAME: java-demo
+    EXTRA_BUILD_ARGS: "--build-arg PROJECT_PATH=$PROJECT_PATH --build-arg NEXUS_USERNAME=$NEXUS_USERNAME --build-arg NEXUS_PASSWORD=$NEXUS_PASSWORD"
   stage: docker-build
+  before_script:
+    - cp "$MVN_CONFIG_FILE" settings.xml
+    # need to copy internal-ca.crt to the working dir for kaniko docker build
+    - if [ ! -z $CA_BUNDLE ]; then cp $CA_BUNDLE ./internal-ca.crt; else touch ./internal-ca.crt; fi
   extends:
     - .kaniko:simple-build-push
 ```
