@@ -11,15 +11,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 import fr.gouv.interieur.dso.service.dto.ResponseDto;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/demo")
+@Tag(name = "Demo", description = "Endpoints de demonstration")
 public class DemoController {
 
     @Autowired
     private DemoService demoService;
 
+    @Operation(summary = "Message hello world")
     @GetMapping("/")
     public ResponseDto helloWorld() {
         ResponseDto responseDto = new ResponseDto();
@@ -28,6 +33,7 @@ public class DemoController {
         return responseDto;
     }
 
+    @Operation(summary = "Liste des demos")
     @GetMapping("/demo")
     public ResponseEntity<List<Demo>> getDemosList(){
         return new ResponseEntity<>(demoService.getListDemo(), HttpStatus.OK);
