@@ -326,3 +326,5 @@ java et choisissez la branche tuto en haut à gauche pour afficher les informati
 ![sonar projet](img/sonarqube-projet.png)
 
 Bravo, vous avez terminé le tutoriel sur la partie construction d'application !
+
+Vous pouvez passer à l'étape 3 : [Gestion des artefacts sur CPiN](https://github.com/cloud-pi-native/formation-cpin-harbor-trivy)
