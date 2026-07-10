@@ -13,6 +13,8 @@ import fr.gouv.interieur.dso.service.dto.ResponseDto;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -21,12 +23,15 @@ import java.util.List;
 @Tag(name = "Demo", description = "Endpoints de demonstration")
 public class DemoController {
 
+    private static final Logger log = LoggerFactory.getLogger(DemoController.class);
+
     @Autowired
     private DemoService demoService;
 
     @Operation(summary = "Message hello world")
     @GetMapping("/")
     public ResponseDto helloWorld() {
+        log.info("GET /api/demo/ - hello world");
         ResponseDto responseDto = new ResponseDto();
         responseDto.setMessage("hello world !");
         responseDto.setStatus("ok");
@@ -36,6 +41,9 @@ public class DemoController {
     @Operation(summary = "Liste des demos")
     @GetMapping("/demo")
     public ResponseEntity<List<Demo>> getDemosList(){
-        return new ResponseEntity<>(demoService.getListDemo(), HttpStatus.OK);
+        log.info("GET /api/demo/demo - fetching demo list");
+        List<Demo> demos = demoService.getListDemo();
+        log.info("Found {} demo(s)", demos.size());
+        return new ResponseEntity<>(demos, HttpStatus.OK);
     }
 }
