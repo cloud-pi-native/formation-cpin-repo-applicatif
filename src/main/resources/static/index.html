@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Application de démo CPiN</title>
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            color-scheme: light dark;
+            --paper: #f2f6fa;
+            --ink: #13213a;
+            --muted: #56657d;
+            --line: #d3dde8;
+            --ok: #16804f;
+            --ok-soft: #ddf1e7;
+            --ko: #b42318;
+            --ko-soft: #fbe3e0;
+            --wait: #8a99af;
+            --link: #2548c8;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --paper: #0e1726;
+                --ink: #e7eef7;
+                --muted: #9aa9bf;
+                --line: #2a3a55;
+                --ok: #4cc38a;
+                --ok-soft: #143a2b;
+                --ko: #ff8a7a;
+                --ko-soft: #3f1d1d;
+                --wait: #5c6e88;
+                --link: #8fa8ff;
+            }
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font: 1rem/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        main {
+            max-width: 46rem;
+            margin: 0 auto;
+            padding: clamp(2.5rem, 8vw, 5.5rem) 1.25rem 3rem;
+        }
+
+        a { color: var(--link); text-underline-offset: 0.2em; }
+
+        :focus-visible { outline: 3px solid var(--link); outline-offset: 3px; border-radius: 4px; }
+
+        /* En-tête : le titre porte l'état de la vérification */
+
+        h1 {
+            margin: 0;
+            max-width: 20ch;
+            font-size: clamp(2.3rem, 4.5vw + 1rem, 3.7rem);
+            font-weight: 760;
+            line-height: 1.04;
+            letter-spacing: -0.03em;
+            text-wrap: balance;
+        }
+
+        .lead {
+            margin: 1.1rem 0 0;
+            max-width: 36rem;
+            font-size: 1.15rem;
+            color: var(--muted);
+        }
+
+        /* Le circuit : chaque étape s'allume quand elle a vraiment répondu */
+
+        .circuit {
+            display: flex;
+            align-items: flex-start;
+            margin: clamp(2.5rem, 6vw, 3.5rem) 0 1.25rem;
+            padding: 0;
+            list-style: none;
+        }
+
+        .hop {
+            flex: 0 0 11rem;
+            display: grid;
+            justify-items: start;
+            gap: 0.15rem;
+        }
+
+        .dot {
+            display: grid;
+            place-items: center;
+            width: 2.75rem;
+            height: 2.75rem;
+            margin-bottom: 0.6rem;
+            border: 2px solid var(--wait);
+            border-radius: 50%;
+            color: var(--paper);
+            font-size: 1.35rem;
+            font-weight: 700;
+            line-height: 1;
+            transition: background-color 0.25s, border-color 0.25s, box-shadow 0.4s;
+        }
+
+        .hop[data-state="ok"] .dot {
+            background: var(--ok);
+            border-color: var(--ok);
+            box-shadow: 0 0 0 0.45rem var(--ok-soft);
+        }
+
+        .hop[data-state="ko"] .dot {
+            background: var(--ko);
+            border-color: var(--ko);
+            box-shadow: 0 0 0 0.45rem var(--ko-soft);
+        }
+
+        .hop[data-state="ok"] .dot::before { content: "✓"; }
+        .hop[data-state="ko"] .dot::before { content: "✕"; font-size: 1.1rem; }
+
+        .hop-name { font-weight: 650; }
+
+        .hop-detail { font-size: 0.9rem; color: var(--muted); }
+        .hop[data-state="ko"] .hop-detail { color: var(--ko); }
+
+        .wire {
+            flex: 1 1 auto;
+            position: relative;
+            height: 2px;
+            min-width: 1.5rem;
+            /* part du bord de la pastille précédente, au-dessus de l'espace vide laissé par son libellé */
+            margin: calc(1.375rem - 1px) 0.5rem 0 -7.75rem;
+            background: var(--line);
+        }
+
+        .wire::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--ok);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.45s ease-out;
+        }
+
+        .wire[data-state="ok"]::after,
+        .wire[data-state="ko"]::after { transform: scaleX(1); }
+
+        .wire[data-state="ko"]::after { background: var(--ko); }
+
+        .retry {
+            padding: 0.55rem 1rem;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: transparent;
+            color: var(--ink);
+            font: inherit;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .retry:hover { border-color: var(--muted); }
+        .retry:disabled { color: var(--muted); cursor: progress; }
+
+        /* Données */
+
+        .data { margin-top: clamp(3rem, 8vw, 4.5rem); }
+
+        h2 {
+            margin: 0;
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: -0.015em;
+        }
+
+        .data > p { margin: 0.35rem 0 0; color: var(--muted); }
+
+        table {
+            width: 100%;
+            margin-top: 1.25rem;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 0 0 0.5rem;
+            border-bottom: 2px solid var(--ink);
+            text-align: left;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        td {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--line);
+            font-size: 1.15rem;
+        }
+
+        th:first-child, td:first-child { width: 4.5rem; }
+
+        td:first-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+        td:last-child { font-weight: 600; }
+
+        .empty td { font-size: 1rem; font-weight: 400; color: var(--muted); }
+
+        footer {
+            margin-top: 3rem;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        footer p { margin: 0.25rem 0; }
+
+        @media (max-width: 40rem) {
+            .circuit { flex-direction: column; }
+            .hop {
+                flex-basis: auto;
+                grid-template-columns: 2.75rem 1fr;
+                column-gap: 1rem;
+            }
+            .dot { grid-row: span 2; margin: 0; }
+            .wire {
+                width: 2px;
+                height: 1.75rem;
+                min-width: 0;
+                margin: 0.6rem 0 0.6rem calc(1.375rem - 1px);
+            }
+            .wire::after { transform: scaleY(0); transform-origin: top; }
+            .wire[data-state="ok"]::after,
+            .wire[data-state="ko"]::after { transform: scaleY(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .dot, .wire::after { transition: none; }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header aria-live="polite">
+        <h1 id="headline">On vérifie votre application…</h1>
+        <p class="lead" id="lead">La page interroge l'API, qui interroge la base de données.</p>
+    </header>
+
+    <ol class="circuit" aria-label="Chemin d'une requête">
+        <li class="hop" id="hop-page" data-state="wait">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="hop-name">Votre navigateur</span>
+            <span class="hop-detail">En attente</span>
+        </li>
+        <li class="wire" id="wire-api" aria-hidden="true"></li>
+        <li class="hop" id="hop-api" data-state="wait">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="hop-name">API Spring Boot</span>
+            <span class="hop-detail">En attente</span>
+        </li>
+        <li class="wire" id="wire-db" aria-hidden="true"></li>
+        <li class="hop" id="hop-db" data-state="wait">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="hop-name">Base PostgreSQL</span>
+            <span class="hop-detail">En attente</span>
+        </li>
+    </ol>
+
+    <button class="retry" id="retry" type="button">Relancer la vérification</button>
+
+    <section class="data" aria-labelledby="data-title">
+        <h2 id="data-title">Les données de la table demo</h2>
+        <p>Lues à l'instant dans la base. Liquibase les a chargées au premier démarrage depuis <code>demo.csv</code>.</p>
+        <table aria-labelledby="data-title">
+            <thead>
+            <tr><th scope="col">id</th><th scope="col">name</th></tr>
+            </thead>
+            <tbody id="rows">
+            <tr class="empty"><td colspan="2">Chargement…</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <footer>
+        <p>Application de démonstration de la formation Cloud Pi Native.</p>
+        <p>Réponses brutes de l'API : <a href="api/demo/demo">api/demo/demo</a> et <a href="api/demo/">api/demo/</a></p>
+    </footer>
+
+    <noscript>
+        <p>JavaScript est désactivé : la vérification ne peut pas s'exécuter. Les données restent consultables sur <a href="api/demo/demo">api/demo/demo</a>.</p>
+    </noscript>
+</main>
+
+<script>
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pause = (ms) => new Promise((resolve) => setTimeout(resolve, reducedMotion ? 0 : ms));
+
+    const headline = document.getElementById("headline");
+    const lead = document.getElementById("lead");
+    const rows = document.getElementById("rows");
+    const retry = document.getElementById("retry");
+
+    const messages = {
+        ok: [
+            "Bravo, votre application fonctionne !",
+            "Elle est déployée, elle répond et elle lit sa base de données. Chaque maillon de la chaîne est opérationnel."
+        ],
+        api: [
+            "L'API ne répond pas correctement",
+            "La page s'affiche, mais l'API renvoie une erreur. Consultez les logs du pod de l'application, puis relancez la vérification."
+        ],
+        db: [
+            "L'application tourne, mais la base ne répond pas",
+            "L'API répond, mais la lecture de la table demo échoue. Vérifiez que PostgreSQL est démarré et que spring.datasource.url pointe vers son service, puis relancez la vérification."
+        ]
+    };
+
+    function setHop(id, state, detail) {
+        const hop = document.getElementById(id);
+        hop.dataset.state = state;
+        hop.querySelector(".hop-detail").textContent = detail;
+    }
+
+    function setWire(id, state) {
+        document.getElementById(id).dataset.state = state;
+    }
+
+    function setMessage(key) {
+        [headline.textContent, lead.textContent] = messages[key];
+        document.title = messages[key][0];
+    }
+
+    function showRows(demos) {
+        rows.replaceChildren();
+        if (demos.length === 0) {
+            showRowsMessage("La table est vide. Les données sont chargées depuis db/data/demo.csv au premier démarrage.");
+            return;
+        }
+        for (const demo of demos) {
+            const tr = document.createElement("tr");
+            for (const value of [demo.id, demo.name]) {
+                const td = document.createElement("td");
+                td.textContent = value;
+                tr.append(td);
+            }
+            rows.append(tr);
+        }
+    }
+
+    function showRowsMessage(text) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        tr.className = "empty";
+        td.colSpan = 2;
+        td.textContent = text;
+        tr.append(td);
+        rows.replaceChildren(tr);
+    }
+
+    async function getJson(url) {
+        let response;
+        try {
+            response = await fetch(url, { headers: { Accept: "application/json" }, cache: "no-store" });
+        } catch {
+            throw new Error("Aucune réponse");
+        }
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP ${response.status}`);
+        }
+        return response.json();
+    }
+
+    async function check() {
+        retry.disabled = true;
+        headline.textContent = "On vérifie votre application…";
+        lead.textContent = "La page interroge l'API, qui interroge la base de données.";
+        for (const id of ["hop-api", "hop-db"]) setHop(id, "wait", "En attente");
+        for (const id of ["wire-api", "wire-db"]) setWire(id, "wait");
+        showRowsMessage("Chargement…");
+
+        setHop("hop-page", "ok", "Page chargée");
+        await pause(300);
+        setWire("wire-api", "ok");
+        await pause(450);
+
+        try {
+            const hello = await getJson("api/demo/");
+            if (hello.status !== "ok") throw new Error(`Statut « ${hello.status} »`);
+            setHop("hop-api", "ok", "Répond sur /api/demo/");
+        } catch (error) {
+            setWire("wire-api", "ko");
+            setHop("hop-api", "ko", error.message);
+            setHop("hop-db", "wait", "Non vérifiée");
+            showRowsMessage("Données indisponibles tant que l'API ne répond pas.");
+            setMessage("api");
+            retry.disabled = false;
+            return;
+        }
+
+        await pause(300);
+        setWire("wire-db", "ok");
+        await pause(450);
+
+        try {
+            const demos = await getJson("api/demo/demo");
+            setHop("hop-db", "ok", `${demos.length} ligne${demos.length > 1 ? "s" : ""} lue${demos.length > 1 ? "s" : ""}`);
+            showRows(demos);
+            setMessage("ok");
+        } catch (error) {
+            setWire("wire-db", "ko");
+            setHop("hop-db", "ko", error.message);
+            showRowsMessage("Données indisponibles : la base ne répond pas.");
+            setMessage("db");
+        }
+        retry.disabled = false;
+    }
+
+    retry.addEventListener("click", check);
+    check();
+</script>
+</body>
+</html>

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class RootController {
 
     @GetMapping("/")
-    public String redirectToDemo() {
-        return "redirect:/api/demo/demo";
+    public String index() {
+        return "forward:/index.html";
     }
 }

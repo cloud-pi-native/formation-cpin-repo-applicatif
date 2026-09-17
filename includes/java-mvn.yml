@@ -13,35 +13,10 @@
     paths:
       - .m2/repository/
 
-.java:build:
-  extends: .java:init
-  script:
-    - cd $WORKING_DIR
-    - echo ${PROJECT_PATH}
-    - mvn $MAVEN_CLI_OPTS clean package -gs $MVN_CONFIG_FILE
-  artifacts:
-    paths:
-      - ${ARTEFACT_DIR}
-    expire_in: 1 seconds
-  interruptible: true
-
 .java:sonar:
   extends: .java:init
   variables:
     GIT_DEPTH: "0"
   script:
     - cd $WORKING_DIR
-    - mvn $MAVEN_CLI_OPTS clean org.jacoco:jacoco-maven-plugin:prepare-agent package test org.jacoco:jacoco-maven-plugin:report org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectName=$PROJECT_NAME -Dsonar.projectKey=$PROJECT_KEY -Dsonar.token=$SONAR_TOKEN -Dhttps.proxyHost=$PROXY_HOST -Dhttps.proxyPort=$PROXY_PORT
-
-.java:deploy:
-  extends: .java:init
-  script:
-    - cd $WORKING_DIR
-    - echo ${PROJECT_PATH}
-    - >
-      mvn $MAVEN_CLI_OPTS clean deploy -s $MVN_CONFIG_FILE -DaltReleaseDeploymentRepository=nexus::default::${NEXUS_HOST_URL}/repository/${PROJECT_PATH}-repository-release/ -DaltSnapshotDeploymentRepository=nexus::default::${NEXUS_HOST_URL}/repository/${PROJECT_PATH}-repository-snapshot/
-  artifacts:
-    paths:
-      - ${ARTEFACT_DIR}
-    expire_in: 1 seconds
-  interruptible: true
+    - mvn $MAVEN_CLI_OPTS clean package org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectName=$PROJECT_NAME -Dsonar.projectKey=$PROJECT_KEY -Dsonar.token=$SONAR_TOKEN -Dhttps.proxyHost=$PROXY_HOST -Dhttps.proxyPort=$PROXY_PORT
