@@ -25,35 +25,32 @@ id;name
 
 ### Processus de compilation et construction de l'application
 
-Le concept de "multistage build" dans Docker permet de définir plusieurs étapes de construction dans un même Dockerfile.
-Chaque étape utilise une image de base différente et peut exécuter des commandes spécifiques.
+Le principe est de séparer la phase de compilation, qui nécessite de nombreux outils et dépendances, de la phase d'exécution, qui n'a besoin que de l'artefact final.
+L'image finale est ainsi plus légère et plus sûre, puisqu'elle ne contient ni Maven, ni le code source, ni les outils de build.
 
-L'intérêt principal est de séparer la phase de compilation (qui nécessite souvent de nombreux outils et dépendances) de la phase d'exécution (qui n'a besoin que de l'artefact final, comme un fichier .jar).
-
-Ainsi, l'image finale est plus légère, plus sécurisée et ne contient que ce qui est strictement nécessaire pour faire tourner l'application.
-Dans l'exemple ci-dessous, la première étape utilise une image Maven pour compiler le projet, puis la seconde étape ne récupère que le .jar généré dans une image Java minimaliste, sans outils de build.
+Ici, la compilation est faite en amont — par la chaîne CI, ou par un `mvn clean package` en local — et le Dockerfile ne fait que déposer le .jar obtenu dans une image Java minimaliste :
 
 ```Dockerfile
-# First stage: complete build environment
-FROM maven:3.9.7-eclipse-temurin-21 AS builder
-
-# add pom.xml and source code
-ADD ./pom.xml pom.xml
-ADD ./src src/
-RUN mvn clean package -Dmaven.test.skip=true
-
 FROM gcr.io/distroless/java21:nonroot
 WORKDIR /app
-COPY --from=builder target/*.jar /app/app.jar
+COPY target/*.jar /app/app.jar
 
 CMD ["-jar", "/app/app.jar"]
 EXPOSE 8080
 ```
 
+> [!IMPORTANT]
+> L'image attend un .jar déjà présent dans `target/`. Avant un `docker build` en local, lancez donc `mvn clean package`, sinon la construction échoue faute de fichier à copier.
+
 La construction de l'image applicative s'effectue donc par les étapes suivantes :
 
-1. Construction de l'image Docker via la commande `docker build`
-2. Envoi de l'image construite dans le référentiel d'image via la commande `docker push`
+1. Compilation de l'application via la commande `mvn clean package`
+2. Construction de l'image Docker via la commande `docker build`
+3. Envoi de l'image construite dans le référentiel d'image via la commande `docker push`
+
+> [!TIP]
+> Une autre approche consiste à utiliser un *multistage build* : le Dockerfile embarque lui-même une première étape `FROM maven:3.9.7-eclipse-temurin-21 AS builder` qui compile le projet, puis une seconde étape qui récupère le .jar avec `COPY --from=builder`.
+> L'image obtenue est identique et le Dockerfile devient autonome, mais l'application est alors compilée deux fois dans le pipeline : une fois pour les tests et l'analyse SonarQube, une fois pour l'image. Nous avons préféré ne la compiler qu'une seule fois.
 
 ## Intégration à la chaîne CPiN
 
@@ -149,6 +146,10 @@ Pour plus d'information sur le catalogue, voir le repo [catalogue gitlab-ci CPiN
 ▶️ Ajoutez à ce même fichier la partie suivante, qui permet de définir les valeurs à mettre en cache, les variables et les étapes de construction :
 
 ```yaml
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+
 variables:
   TAG: "${CI_COMMIT_REF_SLUG}"
   DOCKERFILE: Dockerfile
@@ -165,6 +166,10 @@ La construction du projet se fait en plusieurs étapes :
 1. Lecture des secrets du projet (token GitLab, Nexus, Sonarqube, etc.) par la tâche vault-ci (importée via la section *include* ci-dessus)
 2. Exécution des tests unitaires
 3. Construction de l'image docker et push vers Harbor par la tâche kaniko-ci (importée via la section *include* ci-dessus)
+
+L'application n'est compilée qu'une seule fois : le job `test-app` produit le .jar, le transmet en artefact, et le job `docker-build` se contente de l'embarquer dans l'image.
+
+Le bloc `workflow` en tête de fichier annule automatiquement les pipelines devenus inutiles : si vous poussez un nouveau commit alors qu'un pipeline est encore en cours sur la même branche, ce dernier est interrompu au lieu de monopoliser un runner.
 
 #### Lecture des secrets
 
@@ -187,12 +192,25 @@ test-app:
     BUILD_IMAGE_NAME: maven:3.9.7-eclipse-temurin-21
     WORKING_DIR: .
   stage: test-app
+  needs:
+    - read_secret
   extends:
     - .java:sonar
-  allow_failure: true
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 hour
+  interruptible: true
 ```
 
 Cette partie permet notamment de créer le projet sur l'instance SonarQube CPiN.
+
+Le mot-clef *needs* indique que cette tâche n'attend que `read_secret`, dont elle récupère le token SonarQube.
+La section *artifacts* conserve le .jar produit par la compilation : c'est lui que l'étape suivante placera dans l'image, ce qui évite de recompiler l'application.
+
+La tâche `.java:sonar` procède en deux commandes : `mvn clean package`, qui compile et lance les tests, puis l'analyse SonarQube, qui réutilise les classes et le rapport de couverture déjà produits.
+L'échec de cette seconde commande n'interrompt pas le job : si SonarQube est indisponible, un avertissement apparaît dans les logs et le pipeline continue.
+Une erreur de compilation ou un test en échec, en revanche, arrêtent le pipeline : aucune image n'est alors construite.
 
 #### Construction de l'image et déploiement sur Harbor
 
@@ -204,9 +222,16 @@ docker-build:
     WORKING_DIR: "."
     IMAGE_NAME: java-demo
   stage: docker-build
+  needs:
+    - read_secret
+    - job: test-app
+      artifacts: true
   extends:
     - .kaniko:simple-build-push
+  interruptible: true
 ```
+
+Cette tâche récupère les secrets (`DOCKER_AUTH` et `IMAGE_REPOSITORY`, lus depuis Vault) et le .jar produit par `test-app`, grâce à `artifacts: true`. L'image n'est donc construite que si la compilation et les tests ont réussi.
 
 Pour information, le bloc ci-dessus est une extension (mot-clef *extends*) de la tâche `.kaniko:simple-build-push`, issue du [catalogue de pipelines GitLab](https://github.com/cloud-pi-native/gitlab-ci-catalog?tab=readme-ov-file#simple-build-push) de CPiN.
 Elle est chargée par la section *include* : vous n'avez pas besoin de la recopier dans votre fichier.
@@ -225,6 +250,10 @@ include:
       - kaniko-ci.yml
     ref: main
   - local: "/includes/java-mvn.yml"
+
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
 
 variables:
   TAG: "${CI_COMMIT_REF_SLUG}"
@@ -246,17 +275,28 @@ test-app:
     BUILD_IMAGE_NAME: maven:3.9.7-eclipse-temurin-21
     WORKING_DIR: .
   stage: test-app
+  needs:
+    - read_secret
   extends:
     - .java:sonar
-  allow_failure: true
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 hour
+  interruptible: true
 
 docker-build:
   variables:
     WORKING_DIR: "."
     IMAGE_NAME: java-demo
   stage: docker-build
+  needs:
+    - read_secret
+    - job: test-app
+      artifacts: true
   extends:
     - .kaniko:simple-build-push
+  interruptible: true
 ```
 
 ## Exécution de la chaîne CI par GitLab
