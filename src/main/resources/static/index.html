@@ -6,32 +6,69 @@
     <title>Application de démo CPiN</title>
     <link rel="icon" href="data:,">
     <style>
+        /*
+         * Couleurs, typographie et espacements repris du Système de Design de l'État (DSFR 1.15.3),
+         * https://www.systeme-de-design.gouv.fr — Licence Ouverte 2.0 (Etalab).
+         * La page s'en inspire mais n'est pas une implémentation conforme du DSFR :
+         * elle n'utilise ni le bloc-marque, ni l'en-tête et le pied de page officiels.
+         */
+
+        @font-face {
+            font-family: "Marianne";
+            src: url("fonts/Marianne-Regular.woff2") format("woff2");
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Marianne";
+            src: url("fonts/Marianne-Medium.woff2") format("woff2");
+            font-weight: 500;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Marianne";
+            src: url("fonts/Marianne-Bold.woff2") format("woff2");
+            font-weight: 700;
+            font-display: swap;
+        }
+
         :root {
             color-scheme: light dark;
-            --paper: #f2f6fa;
-            --ink: #13213a;
-            --muted: #56657d;
-            --line: #d3dde8;
-            --ok: #16804f;
-            --ok-soft: #ddf1e7;
-            --ko: #b42318;
-            --ko-soft: #fbe3e0;
-            --wait: #8a99af;
-            --link: #2548c8;
+            --bg: #ffffff;
+            --bg-alt: #f6f6f6;
+            --bg-blue: #f5f5fe;
+            --border: #dddddd;
+            --border-strong: #3a3a3a;
+            --title: #161616;
+            --text: #3a3a3a;
+            --mention: #666666;
+            --blue: #000091;
+            --blue-hover: #1212ff;
+            --success: #18753c;
+            --success-bg: #b8fec9;
+            --error: #ce0500;
+            --error-bg: #ffe9e9;
+            --focus: #0a76f6;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --paper: #0e1726;
-                --ink: #e7eef7;
-                --muted: #9aa9bf;
-                --line: #2a3a55;
-                --ok: #4cc38a;
-                --ok-soft: #143a2b;
-                --ko: #ff8a7a;
-                --ko-soft: #3f1d1d;
-                --wait: #5c6e88;
-                --link: #8fa8ff;
+                --bg: #161616;
+                --bg-alt: #1e1e1e;
+                --bg-blue: #1b1b35;
+                --border: #353535;
+                --border-strong: #cecece;
+                --title: #ffffff;
+                --text: #cecece;
+                --mention: #929292;
+                --blue: #8585f6;
+                --blue-hover: #a1a1f8;
+                --success: #27a658;
+                --success-bg: #19271d;
+                --error: #ff5655;
+                --error-bg: #391c1c;
             }
         }
 
@@ -39,38 +76,52 @@
 
         body {
             margin: 0;
-            background: var(--paper);
-            color: var(--ink);
-            font: 1rem/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font: 400 1rem/1.5 "Marianne", Arial, sans-serif;
         }
 
         main {
-            max-width: 46rem;
+            max-width: 48rem;
             margin: 0 auto;
-            padding: clamp(2.5rem, 8vw, 5.5rem) 1.25rem 3rem;
+            padding: 3rem 1.5rem 4rem;
         }
 
-        a { color: var(--link); text-underline-offset: 0.2em; }
+        a {
+            color: var(--blue);
+            text-underline-offset: 0.2em;
+        }
 
-        :focus-visible { outline: 3px solid var(--link); outline-offset: 3px; border-radius: 4px; }
+        a:hover { color: var(--blue-hover); }
+
+        :focus-visible {
+            outline: 2px solid var(--focus);
+            outline-offset: 2px;
+        }
+
+        code {
+            background: var(--bg-alt);
+            font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+            font-size: 0.9375rem;
+        }
 
         /* En-tête : le titre porte l'état de la vérification */
 
         h1 {
-            margin: 0;
-            max-width: 20ch;
-            font-size: clamp(2.3rem, 4.5vw + 1rem, 3.7rem);
-            font-weight: 760;
-            line-height: 1.04;
-            letter-spacing: -0.03em;
+            margin: 0 0 1.5rem;
+            color: var(--title);
+            font-size: clamp(2rem, 1.2rem + 2.5vw, 2.5rem);
+            font-weight: 700;
+            line-height: 1.2;
             text-wrap: balance;
         }
 
         .lead {
-            margin: 1.1rem 0 0;
-            max-width: 36rem;
-            font-size: 1.15rem;
-            color: var(--muted);
+            margin: 0;
+            padding: 1.5rem;
+            background: var(--bg-blue);
+            font-size: 1.25rem;
+            line-height: 1.6;
         }
 
         /* Le circuit : chaque étape s'allume quand elle a vraiment répondu */
@@ -78,7 +129,7 @@
         .circuit {
             display: flex;
             align-items: flex-start;
-            margin: clamp(2.5rem, 6vw, 3.5rem) 0 1.25rem;
+            margin: 3rem 0 1.5rem;
             padding: 0;
             list-style: none;
         }
@@ -87,43 +138,45 @@
             flex: 0 0 11rem;
             display: grid;
             justify-items: start;
-            gap: 0.15rem;
         }
 
         .dot {
             display: grid;
             place-items: center;
-            width: 2.75rem;
-            height: 2.75rem;
-            margin-bottom: 0.6rem;
-            border: 2px solid var(--wait);
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid var(--border);
             border-radius: 50%;
-            color: var(--paper);
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             font-weight: 700;
             line-height: 1;
-            transition: background-color 0.25s, border-color 0.25s, box-shadow 0.4s;
+            transition: background-color 0.25s, border-color 0.25s, color 0.25s;
         }
 
         .hop[data-state="ok"] .dot {
-            background: var(--ok);
-            border-color: var(--ok);
-            box-shadow: 0 0 0 0.45rem var(--ok-soft);
+            border-color: var(--success);
+            background: var(--success-bg);
+            color: var(--success);
         }
 
         .hop[data-state="ko"] .dot {
-            background: var(--ko);
-            border-color: var(--ko);
-            box-shadow: 0 0 0 0.45rem var(--ko-soft);
+            border-color: var(--error);
+            background: var(--error-bg);
+            color: var(--error);
         }
 
         .hop[data-state="ok"] .dot::before { content: "✓"; }
-        .hop[data-state="ko"] .dot::before { content: "✕"; font-size: 1.1rem; }
+        .hop[data-state="ko"] .dot::before { content: "✕"; font-size: 1rem; }
 
-        .hop-name { font-weight: 650; }
+        .hop-name {
+            color: var(--title);
+            font-weight: 500;
+        }
 
-        .hop-detail { font-size: 0.9rem; color: var(--muted); }
-        .hop[data-state="ko"] .hop-detail { color: var(--ko); }
+        .hop-detail { font-size: 0.875rem; color: var(--mention); }
+        .hop[data-state="ok"] .hop-detail { color: var(--success); }
+        .hop[data-state="ko"] .hop-detail { color: var(--error); }
 
         .wire {
             flex: 1 1 auto;
@@ -131,15 +184,15 @@
             height: 2px;
             min-width: 1.5rem;
             /* part du bord de la pastille précédente, au-dessus de l'espace vide laissé par son libellé */
-            margin: calc(1.375rem - 1px) 0.5rem 0 -7.75rem;
-            background: var(--line);
+            margin: calc(1.25rem - 1px) 0.5rem 0 -8rem;
+            background: var(--border);
         }
 
         .wire::after {
             content: "";
             position: absolute;
             inset: 0;
-            background: var(--ok);
+            background: var(--success);
             transform: scaleX(0);
             transform-origin: left;
             transition: transform 0.45s ease-out;
@@ -148,87 +201,102 @@
         .wire[data-state="ok"]::after,
         .wire[data-state="ko"]::after { transform: scaleX(1); }
 
-        .wire[data-state="ko"]::after { background: var(--ko); }
+        .wire[data-state="ko"]::after { background: var(--error); }
+
+        /* Bouton secondaire, dans l'esprit du DSFR : angles droits, contour bleu France */
 
         .retry {
-            padding: 0.55rem 1rem;
-            border: 1px solid var(--line);
-            border-radius: 999px;
+            min-height: 2.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--blue);
             background: transparent;
-            color: var(--ink);
-            font: inherit;
-            font-size: 0.95rem;
+            color: var(--blue);
+            font: 500 1rem/1.5 "Marianne", Arial, sans-serif;
             cursor: pointer;
         }
 
-        .retry:hover { border-color: var(--muted); }
-        .retry:disabled { color: var(--muted); cursor: progress; }
+        .retry:hover { background: var(--bg-alt); }
+
+        .retry:disabled {
+            border-color: var(--border);
+            color: var(--mention);
+            cursor: progress;
+        }
 
         /* Données */
 
-        .data { margin-top: clamp(3rem, 8vw, 4.5rem); }
+        .data { margin-top: 4rem; }
 
         h2 {
             margin: 0;
-            font-size: 1.45rem;
+            color: var(--title);
+            font-size: 1.75rem;
             font-weight: 700;
-            letter-spacing: -0.015em;
+            line-height: 1.3;
         }
 
-        .data > p { margin: 0.35rem 0 0; color: var(--muted); }
+        .data > p { margin: 0.5rem 0 0; }
 
         table {
             width: 100%;
-            margin-top: 1.25rem;
+            margin-top: 1.5rem;
             border-collapse: collapse;
         }
 
         th {
-            padding: 0 0 0.5rem;
-            border-bottom: 2px solid var(--ink);
+            padding: 0.5rem 1rem 0.5rem 0;
+            border-bottom: 2px solid var(--border-strong);
             text-align: left;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--muted);
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--mention);
         }
 
         td {
-            padding: 0.8rem 0;
-            border-bottom: 1px solid var(--line);
-            font-size: 1.15rem;
+            padding: 0.75rem 1rem 0.75rem 0;
+            border-bottom: 1px solid var(--border);
         }
 
         th:first-child, td:first-child { width: 4.5rem; }
 
-        td:first-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+        td:first-child { color: var(--mention); font-variant-numeric: tabular-nums; }
 
-        td:last-child { font-weight: 600; }
+        td:last-child { color: var(--title); font-weight: 500; }
 
-        .empty td { font-size: 1rem; font-weight: 400; color: var(--muted); }
+        .empty td { color: var(--mention); font-weight: 400; }
 
         footer {
-            margin-top: 3rem;
-            font-size: 0.95rem;
-            color: var(--muted);
+            margin-top: 4rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--blue);
+            font-size: 0.875rem;
+            color: var(--mention);
         }
 
         footer p { margin: 0.25rem 0; }
 
         @media (max-width: 40rem) {
+            main { padding: 2rem 1rem 3rem; }
+
             .circuit { flex-direction: column; }
+
             .hop {
                 flex-basis: auto;
-                grid-template-columns: 2.75rem 1fr;
+                grid-template-columns: 2.5rem 1fr;
                 column-gap: 1rem;
             }
+
             .dot { grid-row: span 2; margin: 0; }
+
             .wire {
                 width: 2px;
-                height: 1.75rem;
+                height: 1.5rem;
                 min-width: 0;
-                margin: 0.6rem 0 0.6rem calc(1.375rem - 1px);
+                margin: 0.5rem 0 0.5rem calc(1.25rem - 1px);
             }
+
             .wire::after { transform: scaleY(0); transform-origin: top; }
+
             .wire[data-state="ok"]::after,
             .wire[data-state="ko"]::after { transform: scaleY(1); }
         }
