@@ -112,6 +112,18 @@ Pensez également à renseigner le champ ***PROJECT_NAME*** en spécifiant le no
 
 ![synchro depuis gitlab](./img/job-synchro-gitlab.png)
 
+### Activation du plugin Nexus
+
+Pour que le build maven se passe correctement, nous devons activer la fonctionnalité Nexus dans la console.
+Nexus permet de gérer les binaires et artefacts que nous allons construire.
+
+▶️ Rendez-vous dans **Services externes** puis dans la section **Configuration des plugins**. Dépliez l'accordéon
+**Nexus** et **activez le dépôt Maven**.
+
+![activation du plugin Nexus](./img/activation-nexus.png)
+
+▶️ Cliquez sur le bouton **Reprovisionner le projet** pour prendre en compte la modification. 
+
 ### Ajout du fichier gitlab-ci-dso
 
 Gitlab est configuré pour utiliser un fichier nommé `.gitlab-ci-dso.yml` qui doit être présent à la racine du projet.
