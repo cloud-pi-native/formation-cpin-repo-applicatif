@@ -19,6 +19,6 @@
     GIT_DEPTH: "0"
   script:
     - cd $WORKING_DIR
-    - mvn $MAVEN_CLI_OPTS -ntp -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository clean package
+    - mvn $MAVEN_CLI_OPTS -ntp -s $MVN_CONFIG_FILE -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository clean package
     - |
-      mvn $MAVEN_CLI_OPTS -ntp -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectName=$PROJECT_NAME -Dsonar.projectKey=$PROJECT_KEY -Dsonar.token=$SONAR_TOKEN -Dhttps.proxyHost=$PROXY_HOST -Dhttps.proxyPort=$PROXY_PORT || echo "ATTENTION : l'analyse SonarQube a échoué, le pipeline continue."
+      mvn $MAVEN_CLI_OPTS -ntp -s $MVN_CONFIG_FILE -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar -Dsonar.projectName=$PROJECT_NAME -Dsonar.projectKey=$PROJECT_KEY -Dsonar.token=$SONAR_TOKEN -Dhttps.proxyHost=$PROXY_HOST -Dhttps.proxyPort=$PROXY_PORT || echo "ATTENTION : l'analyse SonarQube a échoué, le pipeline continue."
