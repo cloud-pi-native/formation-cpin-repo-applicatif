@@ -58,20 +58,20 @@ La construction de l'image applicative s'effectue donc par les étapes suivantes
 
 Ajoutez le dépôt de code de cette application à l'offre Cloud Pi Native de votre projet.
 
-▶️ Depuis votre *projet*, allez dans l'onglet `Ressources`, puis `+ Ajouter un nouveau dépôt` :
+▶️ Depuis votre *projet*, allez dans l'onglet **Ressources**, puis **+ Ajouter un nouveau dépôt** :
 
 ![depot](./img/depots.png)
 
 ▶️ Ajoutez un dépôt avec les paramètres suivants :
 
-- `Nom du dépôt Git interne` : app-java
-- `Url du dépôt Git externe` : https://github.com/cloud-pi-native/formation-cpin-repo-applicatif.git
+- **Nom du dépôt Git interne** : app-java
+- **Url du dépôt Git externe** : https://github.com/cloud-pi-native/formation-cpin-repo-applicatif.git
 
 ▶️ Le dépôt est public et ne contient pas de code d'infrastructure. Laissez les autres cases décochées.
 
-▶️ Cliquez sur le bouton `Ajouter le dépôt` et attendez que le dépôt apparaisse dans la console.
+▶️ Cliquez sur le bouton **Ajouter le dépôt** et attendez que le dépôt apparaisse dans la console.
 
-▶️ Depuis l'onglet `Services externes`, vérifiez en cliquant sur le service Gitlab que le dépôt *app-java* est bien présent dans vos projets GitLab.
+▶️ Depuis l'onglet **Services externes**, vérifiez en cliquant sur le service Gitlab que le dépôt *app-java* est bien présent dans vos projets GitLab.
 
 ![service externe GitLab](./img/services-externes.png)
 
@@ -91,7 +91,7 @@ Exemple :
 
 ### Synchronisation des dépôts
 
-Les jobs de synchronisation sont visibles depuis le dépôt `mirror` puis dans le menu `Build`>`Pipelines` :
+Les jobs de synchronisation sont visibles depuis le dépôt **mirror** puis dans le menu **Build**>**Pipelines** :
 
 ![jobs](./img/job-synchro-mirror.png)
 
@@ -99,14 +99,14 @@ L'exécution de ce job peut se faire de plusieurs manières :
 
 #### Depuis la console CPiN
 
-Depuis la console CPiN, cliquez sur votre dépôt puis sur le bouton `Lancer la synchronisation`.
+Depuis la console CPiN, cliquez sur votre dépôt puis sur le bouton **Lancer la synchronisation**.
 À noter que lors de l'ajout d'un dépôt, une première synchronisation de toutes les branches est effectuée par la console.
 
 ![synchro depuis la console](./img/synchro-console.png)
 
 #### Depuis Gitlab
 
-Dans le projet mirror, allez dans `Build`>`Pipelines` puis cliquez sur le bouton `New Pipeline`.
+Dans le projet mirror, allez dans **Build**>**Pipelines** puis cliquez sur le bouton **New Pipeline**.
 Dans le formulaire de lancement, faites attention à la branche que vous choisissez de synchroniser.
 Pensez également à renseigner le champ ***PROJECT_NAME*** en spécifiant le nom du projet cible (*app-java* par exemple).
 
@@ -135,7 +135,7 @@ Cette convention vous permet de ne pas écraser un éventuel fichier de CI déj�
 > Si vous relancez une synchronisation des branches depuis la console, cela écrasera vos modifications dans le dépôt.
 
 ▶️ Depuis Gitlab, allez dans le projet `app-java` et vérifiez que vous êtes bien à la racine du projet et sur la branche `tuto` en haut à gauche.
-Ensuite, cliquez sur le bouton `+`>`New file`. Appelez votre fichier `.gitlab-ci-dso.yml`.
+Ensuite, cliquez sur le bouton **+**>**New file**. Appelez votre fichier `.gitlab-ci-dso.yml`.
 
 > [!IMPORTANT]
 > Attention à bien nommer le fichier **exactement** `.gitlab-ci-dso.yml`, faute de quoi il ne serait pas pris en compte.
@@ -313,7 +313,7 @@ docker-build:
 
 ## Exécution de la chaîne CI par GitLab
 
-▶️ Une fois que le fichier est créé et *commit* dans le dépôt Gitlab, sélectionnez dans le menu de gauche `Build`>`Pipelines`.
+▶️ Une fois que le fichier est créé et *commit* dans le dépôt Gitlab, sélectionnez dans le menu de gauche **Build**>**Pipelines**.
 Vérifiez que le pipeline s'est déclenché automatiquement.
 
 ![build](img/build.png)
@@ -328,7 +328,7 @@ Les logs d'un build OK sur la troisième étape de build se terminent par une é
 
 Une fois le projet construit, il est possible de consulter le rapport SonarQube.
 
-▶️ Pour cela, depuis la console CPiN, allez dans `Services externes` puis cliquez sur la tuile `SonarQube` :
+▶️ Pour cela, depuis la console CPiN, allez dans **Services externes** puis cliquez sur la tuile **SonarQube** :
 
 ![acces sonar](img/console-tuile-sonar.png)
 
