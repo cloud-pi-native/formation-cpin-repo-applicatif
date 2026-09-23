@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Application de démo CPiN</title>
+    <link rel="icon" href="data:,">
+    <style>
+        /*
+         * Couleurs, typographie et espacements repris du Système de Design de l'État (DSFR 1.15.3),
+         * https://www.systeme-de-design.gouv.fr — Licence Ouverte 2.0 (Etalab).
+         * La page s'en inspire mais n'est pas une implémentation conforme du DSFR :
+         * elle n'utilise ni le bloc-marque, ni l'en-tête et le pied de page officiels.
+         */
+
+        @font-face {
+            font-family: "Marianne";
+            src: url("fonts/Marianne-Regular.woff2") format("woff2");
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Marianne";
+            src: url("fonts/Marianne-Medium.woff2") format("woff2");
+            font-weight: 500;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Marianne";
+            src: url("fonts/Marianne-Bold.woff2") format("woff2");
+            font-weight: 700;
+            font-display: swap;
+        }
+
+        :root {
+            color-scheme: light dark;
+            --bg: #ffffff;
+            --bg-alt: #f6f6f6;
+            --bg-blue: #f5f5fe;
+            --border: #dddddd;
+            --border-strong: #3a3a3a;
+            --title: #161616;
+            --text: #3a3a3a;
+            --mention: #666666;
+            --blue: #000091;
+            --blue-hover: #1212ff;
+            --success: #18753c;
+            --success-bg: #b8fec9;
+            --error: #ce0500;
+            --error-bg: #ffe9e9;
+            --focus: #0a76f6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #161616;
+                --bg-alt: #1e1e1e;
+                --bg-blue: #1b1b35;
+                --border: #353535;
+                --border-strong: #cecece;
+                --title: #ffffff;
+                --text: #cecece;
+                --mention: #929292;
+                --blue: #8585f6;
+                --blue-hover: #a1a1f8;
+                --success: #27a658;
+                --success-bg: #19271d;
+                --error: #ff5655;
+                --error-bg: #391c1c;
+            }
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 400 1rem/1.5 "Marianne", Arial, sans-serif;
+        }
+
+        main {
+            max-width: 48rem;
+            margin: 0 auto;
+            padding: 3rem 1.5rem 4rem;
+        }
+
+        a {
+            color: var(--blue);
+            text-underline-offset: 0.2em;
+        }
+
+        a:hover { color: var(--blue-hover); }
+
+        :focus-visible {
+            outline: 2px solid var(--focus);
+            outline-offset: 2px;
+        }
+
+        code {
+            background: var(--bg-alt);
+            font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+            font-size: 0.9375rem;
+        }
+
+        /* En-tête : le titre porte l'état de la vérification */
+
+        h1 {
+            margin: 0 0 1.5rem;
+            color: var(--title);
+            font-size: clamp(2rem, 1.2rem + 2.5vw, 2.5rem);
+            font-weight: 700;
+            line-height: 1.2;
+            text-wrap: balance;
+        }
+
+        .lead {
+            margin: 0;
+            padding: 1.5rem;
+            background: var(--bg-blue);
+            font-size: 1.25rem;
+            line-height: 1.6;
+        }
+
+        /* Le circuit : chaque étape s'allume quand elle a vraiment répondu */
+
+        .circuit {
+            display: flex;
+            align-items: flex-start;
+            margin: 3rem 0 1.5rem;
+            padding: 0;
+            list-style: none;
+        }
+
+        .hop {
+            flex: 0 0 11rem;
+            display: grid;
+            justify-items: start;
+        }
+
+        .dot {
+            display: grid;
+            place-items: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1;
+            transition: background-color 0.25s, border-color 0.25s, color 0.25s;
+        }
+
+        .hop[data-state="ok"] .dot {
+            border-color: var(--success);
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .hop[data-state="ko"] .dot {
+            border-color: var(--error);
+            background: var(--error-bg);
+            color: var(--error);
+        }
+
+        .hop[data-state="ok"] .dot::before { content: "✓"; }
+        .hop[data-state="ko"] .dot::before { content: "✕"; font-size: 1rem; }
+
+        .hop-name {
+            color: var(--title);
+            font-weight: 500;
+        }
+
+        .hop-detail { font-size: 0.875rem; color: var(--mention); }
+        .hop[data-state="ok"] .hop-detail { color: var(--success); }
+        .hop[data-state="ko"] .hop-detail { color: var(--error); }
+
+        .wire {
+            flex: 1 1 auto;
+            position: relative;
+            height: 2px;
+            min-width: 1.5rem;
+            /* part du bord de la pastille précédente, au-dessus de l'espace vide laissé par son libellé */
+            margin: calc(1.25rem - 1px) 0.5rem 0 -8rem;
+            background: var(--border);
+        }
+
+        .wire::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: var(--success);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.45s ease-out;
+        }
+
+        .wire[data-state="ok"]::after,
+        .wire[data-state="ko"]::after { transform: scaleX(1); }
+
+        .wire[data-state="ko"]::after { background: var(--error); }
+
+        /* Bouton secondaire, dans l'esprit du DSFR : angles droits, contour bleu France */
+
+        .retry {
+            min-height: 2.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--blue);
+            background: transparent;
+            color: var(--blue);
+            font: 500 1rem/1.5 "Marianne", Arial, sans-serif;
+            cursor: pointer;
+        }
+
+        .retry:hover { background: var(--bg-alt); }
+
+        .retry:disabled {
+            border-color: var(--border);
+            color: var(--mention);
+            cursor: progress;
+        }
+
+        /* Données */
+
+        .data { margin-top: 4rem; }
+
+        h2 {
+            margin: 0;
+            color: var(--title);
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .data > p { margin: 0.5rem 0 0; }
+
+        table {
+            width: 100%;
+            margin-top: 1.5rem;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 0.5rem 1rem 0.5rem 0;
+            border-bottom: 2px solid var(--border-strong);
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--mention);
+        }
+
+        td {
+            padding: 0.75rem 1rem 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th:first-child, td:first-child { width: 4.5rem; }
+
+        td:first-child { color: var(--mention); font-variant-numeric: tabular-nums; }
+
+        td:last-child { color: var(--title); font-weight: 500; }
+
+        .empty td { color: var(--mention); font-weight: 400; }
+
+        footer {
+            margin-top: 4rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--blue);
+            font-size: 0.875rem;
+            color: var(--mention);
+        }
+
+        footer p { margin: 0.25rem 0; }
+
+        @media (max-width: 40rem) {
+            main { padding: 2rem 1rem 3rem; }
+
+            .circuit { flex-direction: column; }
+
+            .hop {
+                flex-basis: auto;
+                grid-template-columns: 2.5rem 1fr;
+                column-gap: 1rem;
+            }
+
+            .dot { grid-row: span 2; margin: 0; }
+
+            .wire {
+                width: 2px;
+                height: 1.5rem;
+                min-width: 0;
+                margin: 0.5rem 0 0.5rem calc(1.25rem - 1px);
+            }
+
+            .wire::after { transform: scaleY(0); transform-origin: top; }
+
+            .wire[data-state="ok"]::after,
+            .wire[data-state="ko"]::after { transform: scaleY(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .dot, .wire::after { transition: none; }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <header aria-live="polite">
+        <h1 id="headline">On vérifie votre application…</h1>
+        <p class="lead" id="lead">La page interroge l'API, qui interroge la base de données.</p>
+    </header>
+
+    <ol class="circuit" aria-label="Chemin d'une requête">
+        <li class="hop" id="hop-page" data-state="wait">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="hop-name">Votre navigateur</span>
+            <span class="hop-detail">En attente</span>
+        </li>
+        <li class="wire" id="wire-api" aria-hidden="true"></li>
+        <li class="hop" id="hop-api" data-state="wait">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="hop-name">API Spring Boot</span>
+            <span class="hop-detail">En attente</span>
+        </li>
+        <li class="wire" id="wire-db" aria-hidden="true"></li>
+        <li class="hop" id="hop-db" data-state="wait">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="hop-name">Base PostgreSQL</span>
+            <span class="hop-detail">En attente</span>
+        </li>
+    </ol>
+
+    <button class="retry" id="retry" type="button">Relancer la vérification</button>
+
+    <section class="data" aria-labelledby="data-title">
+        <h2 id="data-title">Les données de la table demo</h2>
+        <p>Lues à l'instant dans la base. Liquibase les a chargées au premier démarrage depuis <code>demo.csv</code>.</p>
+        <table aria-labelledby="data-title">
+            <thead>
+            <tr><th scope="col">id</th><th scope="col">name</th></tr>
+            </thead>
+            <tbody id="rows">
+            <tr class="empty"><td colspan="2">Chargement…</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <footer>
+        <p>Application de démonstration de la formation Cloud Pi Native.</p>
+        <p>Réponses brutes de l'API : <a href="api/demo/demo">api/demo/demo</a> et <a href="api/demo/">api/demo/</a></p>
+    </footer>
+
+    <noscript>
+        <p>JavaScript est désactivé : la vérification ne peut pas s'exécuter. Les données restent consultables sur <a href="api/demo/demo">api/demo/demo</a>.</p>
+    </noscript>
+</main>
+
+<script>
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const pause = (ms) => new Promise((resolve) => setTimeout(resolve, reducedMotion ? 0 : ms));
+
+    const headline = document.getElementById("headline");
+    const lead = document.getElementById("lead");
+    const rows = document.getElementById("rows");
+    const retry = document.getElementById("retry");
+
+    const messages = {
+        ok: [
+            "Bravo, votre application fonctionne !",
+            "Elle est déployée, elle répond et elle lit sa base de données. Chaque maillon de la chaîne est opérationnel."
+        ],
+        api: [
+            "L'API ne répond pas correctement",
+            "La page s'affiche, mais l'API renvoie une erreur. Consultez les logs du pod de l'application, puis relancez la vérification."
+        ],
+        db: [
+            "L'application tourne, mais la base ne répond pas",
+            "L'API répond, mais la lecture de la table demo échoue. Vérifiez que PostgreSQL est démarré et que spring.datasource.url pointe vers son service, puis relancez la vérification."
+        ]
+    };
+
+    function setHop(id, state, detail) {
+        const hop = document.getElementById(id);
+        hop.dataset.state = state;
+        hop.querySelector(".hop-detail").textContent = detail;
+    }
+
+    function setWire(id, state) {
+        document.getElementById(id).dataset.state = state;
+    }
+
+    function setMessage(key) {
+        [headline.textContent, lead.textContent] = messages[key];
+        document.title = messages[key][0];
+    }
+
+    function showRows(demos) {
+        rows.replaceChildren();
+        if (demos.length === 0) {
+            showRowsMessage("La table est vide. Les données sont chargées depuis db/data/demo.csv au premier démarrage.");
+            return;
+        }
+        for (const demo of demos) {
+            const tr = document.createElement("tr");
+            for (const value of [demo.id, demo.name]) {
+                const td = document.createElement("td");
+                td.textContent = value;
+                tr.append(td);
+            }
+            rows.append(tr);
+        }
+    }
+
+    function showRowsMessage(text) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        tr.className = "empty";
+        td.colSpan = 2;
+        td.textContent = text;
+        tr.append(td);
+        rows.replaceChildren(tr);
+    }
+
+    async function getJson(url) {
+        let response;
+        try {
+            response = await fetch(url, { headers: { Accept: "application/json" }, cache: "no-store" });
+        } catch {
+            throw new Error("Aucune réponse");
+        }
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP ${response.status}`);
+        }
+        return response.json();
+    }
+
+    async function check() {
+        retry.disabled = true;
+        headline.textContent = "On vérifie votre application…";
+        lead.textContent = "La page interroge l'API, qui interroge la base de données.";
+        for (const id of ["hop-api", "hop-db"]) setHop(id, "wait", "En attente");
+        for (const id of ["wire-api", "wire-db"]) setWire(id, "wait");
+        showRowsMessage("Chargement…");
+
+        setHop("hop-page", "ok", "Page chargée");
+        await pause(300);
+        setWire("wire-api", "ok");
+        await pause(450);
+
+        try {
+            const hello = await getJson("api/demo/");
+            if (hello.status !== "ok") throw new Error(`Statut « ${hello.status} »`);
+            setHop("hop-api", "ok", "Répond sur /api/demo/");
+        } catch (error) {
+            setWire("wire-api", "ko");
+            setHop("hop-api", "ko", error.message);
+            setHop("hop-db", "wait", "Non vérifiée");
+            showRowsMessage("Données indisponibles tant que l'API ne répond pas.");
+            setMessage("api");
+            retry.disabled = false;
+            return;
+        }
+
+        await pause(300);
+        setWire("wire-db", "ok");
+        await pause(450);
+
+        try {
+            const demos = await getJson("api/demo/demo");
+            setHop("hop-db", "ok", `${demos.length} ligne${demos.length > 1 ? "s" : ""} lue${demos.length > 1 ? "s" : ""}`);
+            showRows(demos);
+            setMessage("ok");
+        } catch (error) {
+            setWire("wire-db", "ko");
+            setHop("hop-db", "ko", error.message);
+            showRowsMessage("Données indisponibles : la base ne répond pas.");
+            setMessage("db");
+        }
+        retry.disabled = false;
+    }
+
+    retry.addEventListener("click", check);
+    check();
+</script>
+</body>
+</html>

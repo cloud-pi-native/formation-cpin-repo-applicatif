@@ -1,8 +1,18 @@
+### Maven ###
 HELP.md
 target/
-!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
+
+### Secrets ###
+# Fichiers SOPS en clair : seule la version chiffrée (*-enc.yaml) est versionnée
+sops.yaml
+*.dec.yaml
+# Clés age / variables d'environnement locales
+*.agekey
+keys.txt
+.env
+.env.*
 
 ### STS ###
 .apt_generated
@@ -18,6 +28,7 @@ target/
 *.iws
 *.iml
 *.ipr
+out/
 
 ### NetBeans ###
 /nbproject/private/
@@ -31,3 +42,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
