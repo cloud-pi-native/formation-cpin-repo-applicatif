@@ -3,7 +3,7 @@
 Vous en êtes à l'étape 2 de la formation CPiN :
 
 1. [Gestion des projets CPiN](https://github.com/cloud-pi-native/formation-cpin-gestion-projet)
-2. ➡️ [Application d'exemple pour déploiement sur CPiN](https://github.com/cloud-pi-native/formation-cpin-repo-applicatif/tree/tuto)
+2. ➡️ [Application d'exemple pour déploiement sur CPiN](https://github.com/cloud-pi-native/formation-cpin-repo-applicatif)
 3. [Gestion des artefacts sur CPiN](https://github.com/cloud-pi-native/formation-cpin-harbor-trivy)
 4. [Chart Helm de démonstration sur CPiN](https://github.com/cloud-pi-native/formation-cpin-deploiement)
 5. [Gestion des secrets sur CPiN](https://github.com/cloud-pi-native/formation-cpin-gestion-secret)
@@ -134,7 +134,7 @@ Cette convention vous permet de ne pas écraser un éventuel fichier de CI déj�
 > En conditions de travail normales, il conviendrait de travailler depuis le dépôt externe et de procéder à des synchronisations de ce dépôt externe vers le dépôt interne hébergé sur Gitlab.
 > Si vous relancez une synchronisation des branches depuis la console, cela écrasera vos modifications dans le dépôt.
 
-▶️ Depuis Gitlab, allez dans le projet `app-java` et vérifiez que vous êtes bien à la racine du projet et sur la branche `tuto` en haut à gauche.
+▶️ Depuis Gitlab, allez dans le projet `app-java` et vérifiez que vous êtes bien à la racine du projet et sur la branche `main` en haut à gauche.
 Ensuite, cliquez sur le bouton **+**>**New file**. Appelez votre fichier `.gitlab-ci-dso.yml`.
 
 > [!IMPORTANT]
@@ -332,7 +332,7 @@ Une fois le projet construit, il est possible de consulter le rapport SonarQube.
 
 ![acces sonar](img/console-tuile-sonar.png)
 
-▶️ Depuis l'onglet *projects* de *SonarQube* sur lequel vous arrivez normalement par défaut, cliquez sur votre projet et choisissez la branche tuto en haut à gauche pour afficher les informations du projet :
+▶️ Depuis l'onglet *projects* de *SonarQube* sur lequel vous arrivez normalement par défaut, cliquez sur votre projet :
 
 ![sonar projet](img/sonarqube-projet.png)
 
