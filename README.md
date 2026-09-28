@@ -87,7 +87,7 @@ Ce groupe contient différents dépôts :
 
 Exemple :
 
-![repos](./img/repo-gitlab.jpg)
+![repos](./img/repo-gitlab.png)
 
 ### Synchronisation des dépôts
 
